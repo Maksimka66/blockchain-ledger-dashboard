@@ -1,0 +1,44 @@
+<template>
+    <svg
+        :width="size"
+        :height="size"
+        viewBox="0 0 64 64"
+        xmlns="http://www.w3.org/2000/svg"
+        class="inline-block"
+    >
+        <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+        </defs>
+
+        <rect
+            x="8"
+            y="8"
+            width="48"
+            height="48"
+            rx="18"
+            ry="18"
+            fill="#3B82F6"
+            filter="url(#glow)"
+        />
+
+        <rect x="16" y="16" width="32" height="32" rx="12" ry="12" fill="white" />
+
+        <circle cx="32" cy="32" r="8" fill="none" stroke="#3B82F6" stroke-width="2" />
+    </svg>
+</template>
+
+<script setup lang="ts">
+interface Props {
+    size?: number | string;
+}
+
+withDefaults(defineProps<Props>(), {
+    size: 64
+});
+</script>
