@@ -16,8 +16,12 @@
                     <Button :width="16" :height="16" @click="copyText"
                         ><template #icon><CopyIcon /></template
                     ></Button>
+
+                    <transition name="mini-toast-fade">
+                        <div v-if="copyToast.visible" class="copy-toast">Copied</div>
+                    </transition>
                 </div>
-                <Button :width="50" :height="16" class="disconnect">
+                <Button :width="50" :height="16" class="disconnect" @click="disconnectWallet">
                     <template #icon><DisconnectIcon /></template>
                     Disconnect
                 </Button>
@@ -27,29 +31,42 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { reactive } from 'vue';
+
 import Button from '../shared/Button.vue';
 import LogoIcon from './Icons/LogoIcon.vue';
 import DisconnectIcon from './Icons/DisconnectIcon.vue';
 import CopyIcon from './Icons/CopyIcon.vue';
 import { appStore } from '../stores/appStore';
+import { disconnectWalletService } from '../services/useWallet';
 
-const copyText = async (e: Event) => {
+const router = useRouter();
+
+const copyToast = reactive({ visible: false, timer: 0 as unknown as number });
+
+const disconnectWallet = async () => {
+    await disconnectWalletService();
+
+    router.push('/');
+};
+
+const copyText = async () => {
     try {
-        const target = e.target as HTMLElement;
-        const copiedAddress = target.previousElementSibling?.textContent;
+        await navigator.clipboard.writeText(appStore().userAddress);
 
-        if (copiedAddress) {
-            await navigator.clipboard.writeText(copiedAddress);
-        }
-    } catch (error) {
-        console.log(error);
+        copyToast.visible = true;
+        clearTimeout(copyToast.timer);
+
+        copyToast.timer = setTimeout(() => (copyToast.visible = false), 1200);
+    } catch (err) {
+        console.log(err);
     }
 };
 </script>
 
 <style scoped>
 .header-app {
-    margin-bottom: 48px;
     padding: 24px 32px;
     border-top: 2px solid rgb(15, 15, 15);
     box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.35);
@@ -82,6 +99,7 @@ const copyText = async (e: Event) => {
 
 .address-container {
     column-gap: 16px;
+    position: relative;
 }
 
 .address-info-layout {
@@ -89,6 +107,7 @@ const copyText = async (e: Event) => {
     background-color: rgb(183, 190, 190);
     border-radius: 24px;
     padding: 4px 16px;
+    position: relative;
 }
 
 .address-info-layout::before {
@@ -104,5 +123,28 @@ const copyText = async (e: Event) => {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 80px;
+}
+
+.copy-toast {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 12px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.mini-toast-fade-enter-active,
+.mini-toast-fade-leave-active {
+    transition: all 0.18s ease;
+}
+.mini-toast-fade-enter-from,
+.mini-toast-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
 }
 </style>

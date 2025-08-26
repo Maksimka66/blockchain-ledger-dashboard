@@ -15,6 +15,11 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+main {
+    background-color: #f8f9fa;
+    padding: 40px;
+}
+
 a {
     font-weight: 500;
     color: #646cff;
@@ -60,7 +65,6 @@ button:focus-visible {
 #app {
     width: 100%;
     margin: 0 auto;
-    padding: 2rem 0;
     text-align: center;
 }
 

@@ -9,11 +9,11 @@
 const props = defineProps({
     width: {
         type: Number,
-        required: true
+        required: false
     },
     height: {
         type: Number,
-        required: true
+        required: false
     },
     icon: {
         type: [Object, Function],
@@ -33,8 +33,11 @@ const props = defineProps({
     justify-content: space-between;
     align-items: center;
     gap: 4px;
-    border-radius: 24px;
     padding: 0;
+    border-radius: 24px;
+}
+
+.custom-button:hover {
 }
 
 .blue-background-btn {
@@ -53,5 +56,12 @@ const props = defineProps({
 .disconnect {
     border: 1px solid black;
     padding: 4px 16px;
+}
+
+.pagination-button {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid black;
+    color: gray;
 }
 </style>

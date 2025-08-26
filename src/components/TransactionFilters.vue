@@ -1,0 +1,70 @@
+<template>
+    <div class="layout">
+        <div class="layout-item">
+            <FilterIcon />
+            <h3 class="filters-title">Filters</h3>
+        </div>
+        <div class="fields-layout">
+            <select class="filter-field" v-model="status">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Validated">Validated</option>
+                <option value="Invalid">Invalid</option>
+            </select>
+            <input class="filter-field" type="text" placeholder="Search by Tx ID" v-model="txId" />
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { appStore } from '../stores/appStore';
+import FilterIcon from './Icons/FilterIcon.vue';
+
+const store = appStore();
+
+const status = computed({
+    get: () => store.txStatusFilter,
+    set: (v: any) => store.setTxStatusFilter(v)
+});
+
+const txId = computed({
+    get: () => store.txIdQuery,
+    set: (v: string) => store.setTxIdQuery(v)
+});
+</script>
+
+<style scoped>
+.layout {
+    padding: 12px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    row-gap: 12px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+}
+
+.layout-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.filters-title {
+    text-align: left;
+}
+
+.fields-layout {
+    display: flex;
+    column-gap: 12px;
+}
+
+.filter-field {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    border: 1px solid gray;
+}
+</style>

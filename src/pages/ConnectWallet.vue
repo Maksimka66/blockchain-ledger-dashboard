@@ -1,24 +1,31 @@
 <template>
-    <Modal v-model="appStore().isWindowOpen"
-        ><div class="layout">
-            <div class="icon-layout">
-                <WalletIcon size="64" stroke-color="#0000FF" />
+    <Modal v-model="appStore().isWindowOpen">
+        <Loader>
+            <div class="layout">
+                <div class="icon-layout">
+                    <WalletIcon size="64" stroke-color="#0000FF" />
+                </div>
+                <div class="text-layout">
+                    <h2 class="text-content title">Connect Wallet</h2>
+                    <p class="text-content">
+                        Connect your MetaMask wallet to access the Blockchain Ledger Dashboard
+                    </p>
+                </div>
+                <div class="connection-layout">
+                    <Button
+                        :width="16"
+                        :height="4"
+                        @click="connectWallet"
+                        class="blue-background-btn"
+                    >
+                        <template #icon><WalletIcon stroke-color="#FFFFFF" size="48" /></template>
+                        Connect MetaMask
+                    </Button>
+                    <p class="secure-info"><ShieldIcon />Your connection is secure and encrypted</p>
+                </div>
             </div>
-            <div class="text-layout">
-                <h2 class="text-content title">Connect Wallet</h2>
-                <p class="text-content">
-                    Connect your MetaMask wallet to access the Blockchain Ledger Dashboard
-                </p>
-            </div>
-            <div class="connection-layout">
-                <Button :width="16" :height="4" @click="connectWallet" class="blue-background-btn">
-                    <template #icon><WalletIcon stroke-color="#FFFFFF" size="48" /></template>
-                    Connect MetaMask
-                </Button>
-                <p class="secure-info"><ShieldIcon />Your connection is secure and encrypted</p>
-            </div>
-        </div></Modal
-    >
+        </Loader>
+    </Modal>
 </template>
 
 <script setup lang="ts">
@@ -26,8 +33,18 @@ import ShieldIcon from '../components/Icons/ShieldIcon.vue';
 import WalletIcon from '../components/Icons/WalletIcon.vue';
 import Button from '../shared/Button.vue';
 import Modal from '../shared/Modal.vue';
-import { connectWallet } from '../services/useWallet';
+import Loader from '../shared/Loader.vue';
+import { connectWalletService } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const connectWallet = async () => {
+    await connectWalletService();
+
+    router.push('/dashboard');
+};
 </script>
 
 <style scoped>

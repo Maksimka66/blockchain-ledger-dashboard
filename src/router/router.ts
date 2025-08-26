@@ -1,19 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import ConnectWallet from '../pages/ConnectWallet.vue';
-import MainPage from '../pages/MainPage.vue';
+import SendTransactionPage from '../pages/SendTransactionPage.vue';
+import DashboardPage from '../pages/DashboardPage.vue';
 
 const routes = [
     {
         path: '/',
-        component: MainPage
+        component: ConnectWallet
     },
     {
         path: '/dashboard',
-        component: ConnectWallet
+        component: DashboardPage
     },
     {
         path: '/send',
-        component: ConnectWallet
+        component: SendTransactionPage
     }
 ];
 
