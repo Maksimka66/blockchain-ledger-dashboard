@@ -34,7 +34,7 @@
                         </div>
                         <Button :width="24" :height="24" class="blue-background-btn">Send</Button>
                     </div>
-                    <!-- Local toast positioned outside (to the right) of the centered form -->
+
                     <transition name="toast-slide-fade">
                         <div
                             v-if="localToast.visible"
@@ -59,14 +59,11 @@ import { sendTransactionService } from '../services/useWallet';
 import Button from '../shared/Button.vue';
 import Loader from '../shared/Loader.vue';
 import { appStore } from '../stores/appStore';
-// import { useToast } from 'vue-toastification';
 
 const formData = reactive({
     toAddress: '',
     amount: ''
 });
-
-// const toast = useToast(); // not used after local toast introduction
 
 const localToast = reactive({
     visible: false,
@@ -84,7 +81,7 @@ const showLocalToast = (
     localToast.type = type;
     localToast.visible = true;
     clearTimeout(localToast.timer);
-    // @ts-ignore - timer id type compatible in browser
+
     localToast.timer = setTimeout(() => {
         localToast.visible = false;
     }, duration);
@@ -112,12 +109,16 @@ const handleSendTransaction = async () => {
     }
 
     const balanceEthStr = await getBalanceService();
+    console.log(balanceEthStr);
+
     const balanceEth = parseFloat(balanceEthStr);
 
     const gasPriceHex = await getGasPriceService();
     const gasPriceWei = parseInt(gasPriceHex, 16);
     const gasLimit = 21000;
     const feeEth = (gasPriceWei * gasLimit) / 1e18;
+
+    console.log(feeEth);
 
     const totalEthNeeded = parsedAmount + feeEth;
 

@@ -21,12 +21,21 @@
                         <div v-if="copyToast.visible" class="copy-toast">Copied</div>
                     </transition>
                 </div>
-                <Button :width="50" :height="16" class="disconnect" @click="disconnectWallet">
+                <Button :width="50" :height="16" class="disconnect" @click="openConfirmModal">
                     <template #icon><DisconnectIcon /></template>
                     Disconnect
                 </Button>
             </div>
         </div>
+        <Modal v-model="appStore().isWindowOpen">
+            <div class="confirm-layout">
+                <p class="confirm-text">Are you sure you want to disconnect from your wallet?</p>
+                <div class="buttons-layout">
+                    <Button class="confirm" @click="confirmDisconnect">Yes</Button>
+                    <Button class="reject" @click="rejectDisconnect">No</Button>
+                </div>
+            </div>
+        </Modal>
     </header>
 </template>
 
@@ -40,15 +49,31 @@ import DisconnectIcon from './Icons/DisconnectIcon.vue';
 import CopyIcon from './Icons/CopyIcon.vue';
 import { appStore } from '../stores/appStore';
 import { disconnectWalletService } from '../services/useWallet';
+import Modal from '../shared/Modal.vue';
 
 const router = useRouter();
 
-const copyToast = reactive({ visible: false, timer: 0 as unknown as number });
+const copyToast = reactive({
+    visible: false,
+    timer: 0 as unknown as number
+});
 
-const disconnectWallet = async () => {
-    await disconnectWalletService();
+const openConfirmModal = () => {
+    appStore().isWindowOpen = true;
+};
 
-    router.push('/');
+const confirmDisconnect = async () => {
+    try {
+        await disconnectWalletService();
+        appStore().userAddress = '';
+        router.push('/');
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+const rejectDisconnect = () => {
+    appStore().isWindowOpen = false;
 };
 
 const copyText = async () => {
@@ -116,6 +141,25 @@ const copyText = async () => {
     height: 8px;
     background-color: green;
     border-radius: 50%;
+}
+
+.confirm-layout {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.confirm-text {
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.buttons-layout {
+    display: flex;
+    justify-content: space-between;
 }
 
 .address-info {

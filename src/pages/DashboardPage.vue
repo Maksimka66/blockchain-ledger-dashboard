@@ -5,20 +5,19 @@
             <main>
                 <NavBar />
                 <div v-if="!appStore().totalValue" class="layout">
-                    <DashboardLayout>
+                    <DashboardLayout class="resent-transactions-layout">
                         <h3 class="transactions-title">Resent Transactions</h3>
                         <TransactionFilters />
                         <ResentTransactions />
                         <Pagination />
                     </DashboardLayout>
-                    <div class="">
+                    <div class="balance-assets-layout">
                         <DashboardLayout>
                             <div class="layout title-layout">
-                                <DollarIcon />
-                                <h3 class="transactions-title">Wallet Balance</h3>
+                                <h3 class="transactions-title wallet-title">Wallet Balance</h3>
                             </div>
                             <p class="amount-description">Total Portfolio Value</p>
-                            <p class="amount-value">$ {{ appStore().totalValue }}</p>
+                            <p class="amount-value">${{ appStore().totalValue }}</p>
                         </DashboardLayout>
                         <DashboardLayout>
                             <h3 class="transactions-title">Assets</h3>
@@ -42,13 +41,19 @@ import DashboardLayout from '../shared/DashboardLayout.vue';
 import Loader from '../shared/Loader.vue';
 import { appStore } from '../stores/appStore';
 import Pagination from '../shared/Pagination.vue';
-import DollarIcon from '../components/Icons/DollarIcon.vue';
 </script>
 
 <style scoped>
 .layout {
     display: flex;
     justify-content: space-between;
+}
+
+.balance-assets-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 5%;
+    width: 30%;
 }
 
 .title-layout {
@@ -60,16 +65,25 @@ import DollarIcon from '../components/Icons/DollarIcon.vue';
 }
 
 .transactions-title {
-    text-align: left;
+    font-weight: 600;
     margin-bottom: 24px;
 }
 
+.wallet-title::before {
+    content: '$';
+    color: blue;
+    margin-right: 32px;
+}
+
 .amount-description {
-    text-align: left;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 .amount-value {
-    text-align: left;
     width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    font-size: 48px;
 }
 </style>

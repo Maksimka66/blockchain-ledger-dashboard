@@ -71,7 +71,7 @@ export const sendTransactionService = async ({
         appStore().setIsLoading(true);
 
         if (!window.ethereum) {
-            throw new Error('MetaMask не установлен');
+            throw new Error('Install MetaMask please!');
         }
 
         if (!appStore().userAddress) {
@@ -113,12 +113,16 @@ export const getBalanceService = async () => {
             return '0';
         }
 
-        const balance = (await window.ethereum.request({
+        const balanceHex = await window.ethereum.request({
             method: 'eth_getBalance',
             params: [appStore().userAddress, 'latest']
-        })) as string;
+        });
 
-        return (parseInt(balance, 16) / 1e18).toString();
+        const balanceWei = BigInt(balanceHex);
+
+        const balanceEth = Number(balanceWei) / 1e18;
+
+        return balanceEth.toString();
     } catch (error) {
         console.error('Ошибка получения баланса:', error);
         return '0';

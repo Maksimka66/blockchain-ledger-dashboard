@@ -58,7 +58,9 @@ const txId = computed({
 
 .fields-layout {
     display: flex;
-    column-gap: 12px;
+    column-gap: 12%;
+    width: 100%;
+    justify-content: center;
 }
 
 .filter-field {
@@ -66,5 +68,6 @@ const txId = computed({
     border-radius: 8px;
     padding: 4px 8px;
     border: 1px solid gray;
+    width: 50%;
 }
 </style>

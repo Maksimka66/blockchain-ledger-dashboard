@@ -54,14 +54,28 @@ const props = defineProps({
 }
 
 .disconnect {
-    border: 1px solid black;
+    border: 1px solid #0f0f0f;
     padding: 4px 16px;
 }
 
 .pagination-button {
     padding: 4px 8px;
     border-radius: 8px;
-    border: 1px solid black;
+    border: 1px solid #0f0f0f;
     color: gray;
+}
+
+.confirm {
+    padding: 16px 80px;
+    background-color: transparent;
+    border: 1px solid #0f0f0f;
+    font-size: 24px;
+}
+
+.reject {
+    padding: 16px 80px;
+    background-color: rgb(53, 53, 231);
+    color: #ffffff;
+    font-size: 24px;
 }
 </style>

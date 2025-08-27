@@ -1,10 +1,17 @@
 <template>
-    <div class="dashboard-layout">
+    <div :class="['dashboard-layout', props.class]">
         <slot></slot>
     </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps({
+    class: {
+        type: String,
+        default: ''
+    }
+});
+</script>
 
 <style scoped>
 .dashboard-layout {
@@ -15,5 +22,9 @@
     display: flex;
     flex-direction: column;
     row-gap: 20px;
+}
+
+.resent-transactions-layout {
+    width: 60%;
 }
 </style>

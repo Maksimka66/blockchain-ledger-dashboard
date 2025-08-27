@@ -45,6 +45,111 @@ export const appStore = defineStore('appStore', {
                 timestamp: '2024-08-19 10:20:08',
                 status: 'Pending',
                 block: 3457819
+            },
+            {
+                id: '0xa1b2c3d4e5f6789',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:30:15',
+                status: 'Invalid',
+                block: 3457821
+            },
+            {
+                id: '0xf6e5d4c3b2a1098',
+                type: 'Mint',
+                timestamp: '2024-08-19 10:25:42',
+                status: 'Validated',
+                block: 3457820
+            },
+            {
+                id: '0x9876543210abcdef',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:20:08',
+                status: 'Pending',
+                block: 3457819
+            },
+            {
+                id: '0xa1b2c3d4e5f6789',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:30:15',
+                status: 'Invalid',
+                block: 3457821
+            },
+            {
+                id: '0xf6e5d4c3b2a1098',
+                type: 'Mint',
+                timestamp: '2024-08-19 10:25:42',
+                status: 'Validated',
+                block: 3457820
+            },
+            {
+                id: '0x9876543210abcdef',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:20:08',
+                status: 'Pending',
+                block: 3457819
+            },
+            {
+                id: '0xa1b2c3d4e5f6789',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:30:15',
+                status: 'Invalid',
+                block: 3457821
+            },
+            {
+                id: '0xf6e5d4c3b2a1098',
+                type: 'Mint',
+                timestamp: '2024-08-19 10:25:42',
+                status: 'Validated',
+                block: 3457820
+            },
+            {
+                id: '0x9876543210abcdef',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:20:08',
+                status: 'Pending',
+                block: 3457819
+            },
+            {
+                id: '0xa1b2c3d4e5f6789',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:30:15',
+                status: 'Invalid',
+                block: 3457821
+            },
+            {
+                id: '0xf6e5d4c3b2a1098',
+                type: 'Mint',
+                timestamp: '2024-08-19 10:25:42',
+                status: 'Validated',
+                block: 3457820
+            },
+            {
+                id: '0x9876543210abcdef',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:20:08',
+                status: 'Pending',
+                block: 3457819
+            },
+            {
+                id: '0xa1b2c3d4e5f6789',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:30:15',
+                status: 'Invalid',
+                block: 3457821
+            },
+            {
+                id: '0xf6e5d4c3b2a1098',
+                type: 'Mint',
+                timestamp: '2024-08-19 10:25:42',
+                status: 'Validated',
+                block: 3457820
+            },
+            {
+                id: '0x9876543210abcdef',
+                type: 'Transfer',
+                timestamp: '2024-08-19 10:20:08',
+                status: 'Pending',
+                block: 3457819
             }
         ],
         isWindowOpen: true,

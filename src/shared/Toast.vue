@@ -12,7 +12,6 @@
 import { computed } from 'vue';
 import { toastStore } from '../stores/toastStore';
 
-// Props for positioning if needed later
 const props = defineProps<{ position?: 'top' | 'top-center' | 'bottom' }>();
 
 const store = toastStore();

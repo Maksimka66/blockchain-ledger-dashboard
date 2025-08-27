@@ -1,6 +1,5 @@
 <template>
     <ul class="transactions-list">
-        <!-- Header -->
         <li class="transactions-header">
             <p class="transactions-cell">Transaction ID</p>
             <p class="transactions-cell">Type</p>
@@ -9,7 +8,6 @@
             <p class="transactions-cell">Block</p>
         </li>
 
-        <!-- Rows -->
         <li class="transactions-row" v-for="value in paged" :key="value.id">
             <p class="transactions-cell transaction-id">{{ value.id }}</p>
             <p class="transactions-cell">

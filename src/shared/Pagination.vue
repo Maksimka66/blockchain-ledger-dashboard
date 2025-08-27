@@ -31,8 +31,8 @@ const next = () => store.nextTxPage();
 <style scoped>
 .layout {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .pagination-buttons {
