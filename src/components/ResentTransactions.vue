@@ -29,9 +29,10 @@
         </li>
     </ul>
 
-    <!-- Pagination -->
     <Pagination
-        :total-items="allTransactions.length"
+        :total-items="
+            appStore().txIdQuery.trim() ? filteredTransactions.length : allTransactions.length
+        "
         :page-size="pageSize"
         @page-change="handlePageChange"
     />
@@ -58,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Button from '../shared/Button.vue';
 import Modal from '../shared/Modal.vue';
 import Pagination from '../shared/Pagination.vue';
@@ -69,6 +70,7 @@ import type { Transaction, TransactionDetails } from '../types';
 
 const res = ref<Transaction[]>([]);
 const allTransactions = ref<Transaction[]>([]);
+const filteredTransactions = ref<Transaction[]>([]);
 
 const currentPage = ref(1);
 const pageSize = 5;
@@ -85,10 +87,8 @@ const getTransactionInfo = async (txHash: string) => {
     appStore().isWindowOpen = true;
     modalType.value = 'transaction';
     const txData = await getCurrentTransaction(txHash);
-    console.log(txData);
 
     selectedTx.value = txData;
-    console.log(selectedTx);
 };
 
 const handlePageChange = (page: number) => {
@@ -96,28 +96,51 @@ const handlePageChange = (page: number) => {
     updateDisplayedTransactions();
 };
 
+const handleSearch = () => {
+    updateDisplayedTransactions();
+};
+
+watch(
+    () => appStore().txIdQuery,
+    () => {
+        currentPage.value = 1;
+        updateDisplayedTransactions();
+    }
+);
+
 const updateDisplayedTransactions = () => {
     const start = (currentPage.value - 1) * pageSize;
     const end = start + pageSize;
-    res.value = allTransactions.value.slice(start, end);
+
+    const searchActive = appStore().txIdQuery;
+
+    if (searchActive.trim()) {
+        filteredTransactions.value = allTransactions.value.filter((tx) =>
+            tx.hash.toLowerCase().includes(searchActive.toLowerCase())
+        );
+        res.value = filteredTransactions.value.slice(start, end);
+    } else {
+        res.value = allTransactions.value.slice(start, end);
+    }
 };
-// const getStatusClass = (status: string) => {
-//     switch (status.toLowerCase()) {
-//         case 'validated':
-//         case 'valid':
-//             return 'status-badge status-valid';
-//         case 'success':
-//             return 'status-badge status-success';
-//         case 'pending':
-//         case 'in progress':
-//             return 'status-badge status-pending';
-//         case 'invalid':
-//         case 'failed':
-//             return 'status-badge status-invalid';
-//         default:
-//             return 'status-badge status-default';
-//     }
-// };
+
+const getStatusClass = (status: string) => {
+    switch (status.toLowerCase()) {
+        case 'validated':
+        case 'valid':
+            return 'status-badge status-valid';
+        case 'success':
+            return 'status-badge status-success';
+        case 'pending':
+        case 'in progress':
+            return 'status-badge status-pending';
+        case 'invalid':
+        case 'failed':
+            return 'status-badge status-invalid';
+        default:
+            return 'status-badge status-default';
+    }
+};
 
 onMounted(async () => {
     try {

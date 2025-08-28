@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { appStore } from '../stores/appStore';
 import FilterIcon from './Icons/FilterIcon.vue';
 
@@ -31,6 +31,37 @@ const status = computed({
 const txId = computed({
     get: () => store.txIdQuery,
     set: (v: string) => store.setTxIdQuery(v)
+});
+
+// Локальная логика фильтрации
+const searchHash = ref('');
+const allTransactions = ref<any[]>([]);
+const filteredTransactions = ref<any[]>([]);
+
+// Слушаем изменения в txId и применяем фильтрацию
+watch(txId, (newValue) => {
+    searchHash.value = newValue;
+    handleSearch();
+});
+
+const handleSearch = () => {
+    if (searchHash.value.trim()) {
+        filteredTransactions.value = allTransactions.value.filter((tx) =>
+            tx.hash.toLowerCase().includes(searchHash.value.toLowerCase())
+        );
+    } else {
+        filteredTransactions.value = [];
+    }
+};
+
+// Экспортируем функции для использования в ResentTransactions
+defineExpose({
+    setAllTransactions: (transactions: any[]) => {
+        allTransactions.value = transactions;
+        handleSearch();
+    },
+    getFilteredTransactions: () => filteredTransactions.value,
+    getSearchHash: () => searchHash.value
 });
 </script>
 
