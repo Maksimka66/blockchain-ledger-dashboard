@@ -8,7 +8,7 @@
             <p class="transactions-cell">Block</p>
         </li>
 
-        <li class="transactions-row" v-for="value in transactions" :key="value.hash">
+        <li class="transactions-row" v-for="value in res" :key="value.hash">
             <Button
                 @click="getTransactionInfo(value.hash)"
                 class="transaction-id current-transaction"
@@ -20,7 +20,7 @@
             </p>
             <p class="transactions-cell">{{ value.timeStamp }}</p>
             <p class="transactions-cell">
-                <!-- <span :class="getStatusClass(value.status)">{{ value.status }}</span> -->
+                <span :class="getStatusClass(value.status)">{{ value.status }}</span>
             </p>
             <p class="transactions-cell">{{ value.blockNumber }}</p>
             <div class="transactions-actions" v-if="value.status === 'Invalid'">
@@ -30,14 +30,13 @@
     </ul>
 
     <Pagination
-        :total-items="
-            appStore().txIdQuery.trim() ? filteredTransactions.length : allTransactions.length
-        "
+        :total-items="filteredTransactions.length"
         :page-size="pageSize"
+        :initial-page="currentPage"
         @page-change="handlePageChange"
     />
 
-    <Modal v-model="appStore().isWindowOpen" v-if="modalType === 'transaction'">
+    <Modal v-model="store.isWindowOpen" v-if="modalType === 'transaction'">
         <div class="transaction-details">
             <h3 class="transaction-details-title">Transaction Details</h3>
             <div class="transaction-details-grid">
@@ -59,24 +58,61 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import Button from '../shared/Button.vue';
 import Modal from '../shared/Modal.vue';
 import Pagination from '../shared/Pagination.vue';
-import { getAllTransactionsService, getCurrentTransaction } from '../services/useWallet';
+import { getCurrentTransaction } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
 import type { ITransactionData, Transaction, TransactionDetails } from '../types';
 
-defineProps<{
+const props = defineProps<{
     transactions: ITransactionData[];
 }>();
 
-const res = ref<Transaction[]>([]);
-const allTransactions = ref<Transaction[]>([]);
-const filteredTransactions = ref<Transaction[]>([]);
+const store = appStore();
 
-const currentPage = ref(1);
 const pageSize = 5;
+const currentPage = ref(1);
+
+const allTransactions = ref<Transaction[]>([]);
+watch(
+    () => props.transactions,
+    (newTxs) => {
+        allTransactions.value = (newTxs || []) as unknown as Transaction[];
+        currentPage.value = 1;
+    },
+    { immediate: true }
+);
+
+// Фильтры: статус + поиск по хешу (Tx ID)
+const filteredTransactions = computed<Transaction[]>(() => {
+    const statusFilter = (store.txStatusFilter || 'All').toLowerCase();
+    const query = (store.txIdQuery || '').trim().toLowerCase();
+
+    let list = allTransactions.value;
+
+    if (statusFilter !== 'all') {
+        list = list.filter((tx) => (tx.status || '').toLowerCase() === statusFilter);
+    }
+
+    if (query) {
+        list = list.filter((tx) => (tx.hash || '').toLowerCase().includes(query));
+    }
+
+    return list;
+});
+
+// Сброс на первую страницу при изменении фильтров
+watch([() => store.txIdQuery, () => store.txStatusFilter], () => {
+    currentPage.value = 1;
+});
+
+// Пагинация от отфильтрованного списка
+const res = computed<Transaction[]>(() => {
+    const start = (currentPage.value - 1) * pageSize;
+    return filteredTransactions.value.slice(start, start + pageSize);
+});
 
 const selectedTx = ref<TransactionDetails>({
     hash: '',
@@ -87,69 +123,33 @@ const selectedTx = ref<TransactionDetails>({
 const modalType = ref<'transaction' | 'confirmation' | ''>('');
 
 const getTransactionInfo = async (txHash: string) => {
-    appStore().isWindowOpen = true;
+    store.isWindowOpen = true;
     modalType.value = 'transaction';
     const txData = await getCurrentTransaction(txHash);
-
     selectedTx.value = txData;
 };
 
 const handlePageChange = (page: number) => {
     currentPage.value = page;
-    updateDisplayedTransactions();
 };
 
-watch(
-    () => appStore().txIdQuery,
-    () => {
-        currentPage.value = 1;
-        updateDisplayedTransactions();
-    }
-);
-
-const updateDisplayedTransactions = () => {
-    const start = (currentPage.value - 1) * pageSize;
-    const end = start + pageSize;
-
-    const searchActive = appStore().txIdQuery;
-
-    if (searchActive.trim()) {
-        filteredTransactions.value = allTransactions.value.filter((tx) =>
-            tx.hash.toLowerCase().includes(searchActive.toLowerCase())
-        );
-        res.value = filteredTransactions.value.slice(start, end);
-    } else {
-        res.value = allTransactions.value.slice(start, end);
+const getStatusClass = (status?: string) => {
+    switch ((status || '').toLowerCase()) {
+        case 'validated':
+        case 'valid':
+            return 'status-badge status-valid';
+        case 'success':
+            return 'status-badge status-success';
+        case 'pending':
+        case 'in progress':
+            return 'status-badge status-pending';
+        case 'invalid':
+        case 'failed':
+            return 'status-badge status-invalid';
+        default:
+            return 'status-badge status-default';
     }
 };
-
-// const getStatusClass = (status: string) => {
-//     switch (status.toLowerCase()) {
-//         case 'validated':
-//         case 'valid':
-//             return 'status-badge status-valid';
-//         case 'success':
-//             return 'status-badge status-success';
-//         case 'pending':
-//         case 'in progress':
-//             return 'status-badge status-pending';
-//         case 'invalid':
-//         case 'failed':
-//             return 'status-badge status-invalid';
-//         default:
-//             return 'status-badge status-default';
-//     }
-// };
-
-// onMounted(async () => {
-//     try {
-//         const response = await getAllTransactionsService(appStore().userAddress);
-//         allTransactions.value = response;
-//         updateDisplayedTransactions();
-//     } catch (error) {
-//         console.log(error);
-//     }
-// });
 </script>
 
 <style scoped>
@@ -201,12 +201,13 @@ const updateDisplayedTransactions = () => {
 }
 
 .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
+    display:
+        inline-block,
+        padding 4px 12px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 600;
-    border: 1px solid;
+    border: 1px solid red;
 }
 
 .status-valid {
