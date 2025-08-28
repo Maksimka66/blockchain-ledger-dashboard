@@ -72,6 +72,34 @@ const props = defineProps({
     text-overflow: ellipsis;
     display: block;
     padding: 4px 12px;
+    color: #2563eb;
+    font-weight: 600;
+    background: transparent;
+    text-align: left;
+}
+
+.current-transaction:hover {
+    text-decoration: underline;
+}
+
+.get-started {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.get-started:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .confirm {

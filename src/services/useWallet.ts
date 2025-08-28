@@ -30,8 +30,6 @@ export async function connectWalletService() {
 
         const balance = await getBalanceService(accounts[0]);
 
-        console.log(balance);
-
         if (accounts.length > 0) {
             appStore().setUserAddress(accounts[0]);
             localStorage.setItem('userAddress', accounts[0]);
@@ -68,9 +66,8 @@ export async function getBalanceService(address: string): Promise<number> {
     }
 }
 
-export async function getAllTransactionsService() {
+export async function getAllTransactionsService(address: string) {
     try {
-        const address = '0x0970ce7c99c95db8cc08710b6a44e299a4ae727e';
         const apiKey = 'YXD5ZJ4XVJ3MAJDVEJ6ASIX5Z55WKTUDGX';
 
         const url = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${apiKey}`;
@@ -104,7 +101,6 @@ export async function disconnectWalletService() {
 
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('userAddress');
-                sessionStorage.removeItem('userAddress');
             }
         }
     } catch (error) {
@@ -137,6 +133,14 @@ export async function sendTransactionService({
             gas: '0x5208'
         };
 
+        console.log(amount);
+
+        const currentBalance = await getBalanceService(appStore().userAddress);
+
+        if (amount > currentBalance) {
+            throw Error('Your balance is not enough for this transaction!');
+        }
+
         if (gasPrice) {
             transactionParameters.gasPrice = gasPrice;
         }
@@ -145,10 +149,6 @@ export async function sendTransactionService({
             method: 'eth_sendTransaction',
             params: [transactionParameters]
         });
-
-        console.log(txHash);
-
-        trackTransactionStatus(txHash).catch((e) => console.error('Track status error', e));
 
         return txHash;
     } catch (error) {

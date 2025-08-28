@@ -4,11 +4,12 @@
             <Header />
             <main>
                 <NavBar />
-                <div class="layout">
+                <div class="layout" v-if="transactions.length > 0">
                     <DashboardLayout class="resent-transactions-layout">
                         <h3 class="transactions-title">Resent Transactions</h3>
+
                         <TransactionFilters />
-                        <ResentTransactions />
+                        <ResentTransactions :transactions="transactions" />
                     </DashboardLayout>
                     <div class="balance-assets-layout">
                         <DashboardLayout>
@@ -31,9 +32,9 @@
                         </DashboardLayout>
                     </div>
                 </div>
-                <!-- <div v-else>
+                <div v-else>
                     <h2>No transactions found</h2>
-                </div> -->
+                </div>
             </main>
         </div>
     </Loader>
@@ -50,17 +51,27 @@ import Loader from '../shared/Loader.vue';
 import { appStore } from '../stores/appStore';
 
 import Assets from '../components/Assets.vue';
-import { getBalanceService } from '../services/useWallet';
+import { getAllTransactionsService, getBalanceService } from '../services/useWallet';
+
+const transactions = ref([]);
 
 const totalValue = ref<number>(0);
 
-const getBalance = async () => {
-    const value = await getBalanceService(appStore().userAddress); //
-    totalValue.value = value;
-};
+onMounted(async () => {
+    try {
+        const res = await getAllTransactionsService(appStore().userAddress);
+        transactions.value = res;
+        console.log(res);
 
-onMounted(() => {
-    getBalance();
+        const value = await getBalanceService(appStore().userAddress);
+        totalValue.value = value;
+
+        console.log(transactions.value);
+
+        // await getBalance();
+    } catch (error) {
+        console.log(error);
+    }
 });
 </script>
 

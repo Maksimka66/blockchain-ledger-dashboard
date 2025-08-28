@@ -135,20 +135,6 @@ const handleSendTransaction = async () => {
             amount: parsedAmount
         });
 
-        const receipt = await tx.wait();
-
-        if (receipt.status === 1) {
-            appStore().updateResentTransaction(tx.hash, {
-                status: 'Validated',
-                block: receipt.blockNumber
-            });
-        } else {
-            appStore().updateResentTransaction(tx.hash, {
-                status: 'Invalid',
-                block: receipt.blockNumber
-            });
-        }
-
         showLocalToast('Transaction sent', 'success');
 
         formData.toAddress = '';

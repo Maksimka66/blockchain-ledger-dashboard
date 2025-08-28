@@ -18,6 +18,7 @@
 main {
     background-color: #f8f9fa;
     padding: 40px;
+    min-height: 100vh;
 }
 
 a {

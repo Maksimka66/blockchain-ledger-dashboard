@@ -8,10 +8,10 @@
             <p class="transactions-cell">Block</p>
         </li>
 
-        <li class="transactions-row" v-for="value in res" :key="value.hash">
+        <li class="transactions-row" v-for="value in transactions" :key="value.hash">
             <Button
                 @click="getTransactionInfo(value.hash)"
-                class="transactions-cell transaction-id current-transaction"
+                class="transaction-id current-transaction"
             >
                 {{ value.hash }}
             </Button>
@@ -65,8 +65,11 @@ import Modal from '../shared/Modal.vue';
 import Pagination from '../shared/Pagination.vue';
 import { getAllTransactionsService, getCurrentTransaction } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
+import type { ITransactionData, Transaction, TransactionDetails } from '../types';
 
-import type { Transaction, TransactionDetails } from '../types';
+defineProps<{
+    transactions: ITransactionData[];
+}>();
 
 const res = ref<Transaction[]>([]);
 const allTransactions = ref<Transaction[]>([]);
@@ -96,10 +99,6 @@ const handlePageChange = (page: number) => {
     updateDisplayedTransactions();
 };
 
-const handleSearch = () => {
-    updateDisplayedTransactions();
-};
-
 watch(
     () => appStore().txIdQuery,
     () => {
@@ -124,63 +123,72 @@ const updateDisplayedTransactions = () => {
     }
 };
 
-const getStatusClass = (status: string) => {
-    switch (status.toLowerCase()) {
-        case 'validated':
-        case 'valid':
-            return 'status-badge status-valid';
-        case 'success':
-            return 'status-badge status-success';
-        case 'pending':
-        case 'in progress':
-            return 'status-badge status-pending';
-        case 'invalid':
-        case 'failed':
-            return 'status-badge status-invalid';
-        default:
-            return 'status-badge status-default';
-    }
-};
+// const getStatusClass = (status: string) => {
+//     switch (status.toLowerCase()) {
+//         case 'validated':
+//         case 'valid':
+//             return 'status-badge status-valid';
+//         case 'success':
+//             return 'status-badge status-success';
+//         case 'pending':
+//         case 'in progress':
+//             return 'status-badge status-pending';
+//         case 'invalid':
+//         case 'failed':
+//             return 'status-badge status-invalid';
+//         default:
+//             return 'status-badge status-default';
+//     }
+// };
 
-onMounted(async () => {
-    try {
-        const response = await getAllTransactionsService();
-        allTransactions.value = response;
-        updateDisplayedTransactions();
-    } catch (error) {
-        console.log(error);
-    }
-});
+// onMounted(async () => {
+//     try {
+//         const response = await getAllTransactionsService(appStore().userAddress);
+//         allTransactions.value = response;
+//         updateDisplayedTransactions();
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
 </script>
 
 <style scoped>
 .transactions-list {
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 14px;
     overflow: hidden;
-    background: white;
+    background: #ffffff;
     list-style: none;
     padding: 0;
     margin: 0;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
 
 .transactions-header {
     display: grid;
     grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
     gap: 16px;
-    background: #f9fafb;
-    padding: 12px 16px;
-    font-weight: 500;
-    color: #6b7280;
+    background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #374151;
     border-bottom: 1px solid #e5e7eb;
+    letter-spacing: 0.2px;
 }
 
 .transactions-row {
     display: grid;
     grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
     gap: 16px;
-    padding: 12px 16px;
+    padding: 14px 18px;
     border-bottom: 1px solid #f3f4f6;
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease;
+}
+
+.transactions-row:nth-child(odd) {
+    background: #fcfcfd;
 }
 
 .transactions-row:last-child {
@@ -188,27 +196,16 @@ onMounted(async () => {
 }
 
 .transactions-row:hover {
-    background: #f9fafb;
-}
-
-.transactions-cell {
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.transaction-id {
-    color: #2563eb;
-    font-weight: 500;
+    background: #f8fafc;
+    transform: translateY(-1px);
 }
 
 .status-badge {
     display: inline-block;
-    padding: 2px 12px;
-    border-radius: 8px;
+    padding: 4px 12px;
+    border-radius: 999px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     border: 1px solid;
 }
 
@@ -242,27 +239,26 @@ onMounted(async () => {
     border-color: #d1d5db;
 }
 
-/* Type badge (gray) */
 .type-badge {
     display: inline-block;
-    padding: 2px 12px;
-    border-radius: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: 12px;
-    font-weight: 500;
-    border: 1px solid #d1d5db;
-    background-color: #f3f4f6;
-    color: #4b5563;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    background-color: #f8fafc;
+    color: #374151;
 }
 
-/* Transaction Details Modal */
+/* Модальное окно с деталями транзакции */
 .transaction-details {
     padding: 24px;
-    max-width: 500px;
+    max-width: 520px;
 }
 
 .transaction-details-title {
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 700;
     color: #111827;
     margin: 0 0 24px 0;
     text-align: center;
@@ -282,7 +278,7 @@ onMounted(async () => {
     gap: 8px;
     padding: 16px;
     background: #f9fafb;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #e5e7eb;
     transition: all 0.2s ease;
 }
@@ -295,22 +291,37 @@ onMounted(async () => {
 }
 
 .detail-label {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .detail-value {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     color: #111827;
     word-break: break-all;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     background: #ffffff;
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #e5e7eb;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .transactions-header,
+    .transactions-row {
+        grid-template-columns: 1.6fr 0.9fr 1.8fr 0.9fr 0.8fr;
+        gap: 12px;
+        padding: 12px 12px;
+    }
+
+    .transactions-list {
+        border-radius: 12px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.05);
+    }
 }
 </style>

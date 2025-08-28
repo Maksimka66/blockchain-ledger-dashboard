@@ -1,31 +1,41 @@
 <template>
-    <Modal v-model="appStore().isWindowOpen">
-        <Loader>
-            <div class="layout">
-                <div class="icon-layout">
-                    <WalletIcon size="64" stroke-color="#0000FF" />
+    <div class="layout get-started-layout">
+        <h1 class="main-title">
+            Open up access to the digital world - start by connecting your wallet
+        </h1>
+        <Button class="get-started" @click="openConnectWindow">Get started!</Button>
+        <Modal v-model="appStore().isWindowOpen">
+            <Loader>
+                <div class="layout">
+                    <div class="icon-layout">
+                        <WalletIcon size="64" stroke-color="#0000FF" />
+                    </div>
+                    <div class="text-layout">
+                        <h2 class="text-content title">Connect Wallet</h2>
+                        <p class="text-content">
+                            Connect your MetaMask wallet to access the Blockchain Ledger Dashboard
+                        </p>
+                    </div>
+                    <div class="connection-layout">
+                        <Button
+                            :width="16"
+                            :height="4"
+                            @click="connectWallet"
+                            class="blue-background-btn"
+                        >
+                            <template #icon
+                                ><WalletIcon stroke-color="#FFFFFF" size="48"
+                            /></template>
+                            Connect MetaMask
+                        </Button>
+                        <p class="secure-info">
+                            <ShieldIcon />Your connection is secure and encrypted
+                        </p>
+                    </div>
                 </div>
-                <div class="text-layout">
-                    <h2 class="text-content title">Connect Wallet</h2>
-                    <p class="text-content">
-                        Connect your MetaMask wallet to access the Blockchain Ledger Dashboard
-                    </p>
-                </div>
-                <div class="connection-layout">
-                    <Button
-                        :width="16"
-                        :height="4"
-                        @click="connectWallet"
-                        class="blue-background-btn"
-                    >
-                        <template #icon><WalletIcon stroke-color="#FFFFFF" size="48" /></template>
-                        Connect MetaMask
-                    </Button>
-                    <p class="secure-info"><ShieldIcon />Your connection is secure and encrypted</p>
-                </div>
-            </div>
-        </Loader>
-    </Modal>
+            </Loader>
+        </Modal>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -34,18 +44,18 @@ import WalletIcon from '../components/Icons/WalletIcon.vue';
 import Button from '../shared/Button.vue';
 import Modal from '../shared/Modal.vue';
 import Loader from '../shared/Loader.vue';
-import { connectWalletService, getAllTransactionsService } from '../services/useWallet';
+import { connectWalletService } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+const openConnectWindow = () => {
+    appStore().setIsWindowOpen(true);
+};
+
 const connectWallet = async () => {
     const res = await connectWalletService();
-
-    // const trans = await getAllTransactionsService();
-
-    // console.log(trans);
 
     if (res) {
         router.push('/dashboard');
@@ -62,6 +72,10 @@ const connectWallet = async () => {
     row-gap: 36px;
 }
 
+.get-started-layout {
+    min-height: 100vh;
+}
+
 .icon-layout {
     margin: 0 auto;
     border-radius: 10px;
@@ -71,6 +85,17 @@ const connectWallet = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.main-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: #1e1e2f;
+    text-align: center;
+    margin-bottom: 16px;
+    font-family: 'Sora', sans-serif;
+    line-height: 1.2;
+    animation: fadeInDown 0.8s ease-out;
 }
 
 .text-layout {

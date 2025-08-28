@@ -29,7 +29,7 @@ export interface PaginationEmits {
 }
 
 export interface ITransactionData {
-    id: string;
+    hash: string;
     type: string;
     timestamp: string;
     status: 'Validated' | 'Pending' | 'Invalid';

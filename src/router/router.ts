@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import ConnectWallet from '../pages/ConnectWallet.vue';
 import SendTransactionPage from '../pages/SendTransactionPage.vue';
 import DashboardPage from '../pages/DashboardPage.vue';
+import NotFoundPage from '../pages/NotFoundPage.vue';
 
 const routes = [
     {
@@ -15,6 +16,11 @@ const routes = [
     {
         path: '/send',
         component: SendTransactionPage
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFoundPage
     }
 ];
 

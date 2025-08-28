@@ -34,7 +34,7 @@ const positionClass = computed(() => {
     transform: translateX(-50%);
     z-index: 3;
     width: max-content;
-    max-width: 90vw;
+    width: 90vw;
 }
 
 .pos-top-center {

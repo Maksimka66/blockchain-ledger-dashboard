@@ -5,19 +5,20 @@
             <h3 class="filters-title">Filters</h3>
         </div>
         <div class="fields-layout">
-            <select class="filter-field" v-model="status">
+            <select class="filter-field select-field" v-model="status">
                 <option value="All">All</option>
                 <option value="Pending">Pending</option>
                 <option value="Validated">Validated</option>
                 <option value="Invalid">Invalid</option>
             </select>
+
             <input class="filter-field" type="text" placeholder="Search by Tx ID" v-model="txId" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed } from 'vue';
 import { appStore } from '../stores/appStore';
 import FilterIcon from './Icons/FilterIcon.vue';
 
@@ -31,37 +32,6 @@ const status = computed({
 const txId = computed({
     get: () => store.txIdQuery,
     set: (v: string) => store.setTxIdQuery(v)
-});
-
-// Локальная логика фильтрации
-const searchHash = ref('');
-const allTransactions = ref<any[]>([]);
-const filteredTransactions = ref<any[]>([]);
-
-// Слушаем изменения в txId и применяем фильтрацию
-watch(txId, (newValue) => {
-    searchHash.value = newValue;
-    handleSearch();
-});
-
-const handleSearch = () => {
-    if (searchHash.value.trim()) {
-        filteredTransactions.value = allTransactions.value.filter((tx) =>
-            tx.hash.toLowerCase().includes(searchHash.value.toLowerCase())
-        );
-    } else {
-        filteredTransactions.value = [];
-    }
-};
-
-// Экспортируем функции для использования в ResentTransactions
-defineExpose({
-    setAllTransactions: (transactions: any[]) => {
-        allTransactions.value = transactions;
-        handleSearch();
-    },
-    getFilteredTransactions: () => filteredTransactions.value,
-    getSearchHash: () => searchHash.value
 });
 </script>
 
@@ -81,10 +51,13 @@ defineExpose({
     display: flex;
     flex-direction: row;
     align-items: center;
+    column-gap: 8px;
 }
 
 .filters-title {
     text-align: left;
+    font-weight: 600;
+    color: #1f2937;
 }
 
 .fields-layout {
@@ -96,9 +69,31 @@ defineExpose({
 
 .filter-field {
     background-color: #ffffff;
-    border-radius: 8px;
-    padding: 4px 8px;
-    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 2px solid #e5e7eb;
     width: 50%;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+/* Search icon inside the input without overlapping placeholder */
+input.filter-field {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-3.8-3.8"/></svg>');
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    background-size: 16px 16px;
+    padding-left: 38px;
+}
+
+.filter-field:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.select-field {
+    cursor: pointer;
 }
 </style>
+
