@@ -27,7 +27,7 @@
                 </Button>
             </div>
         </div>
-        <Modal v-model="appStore().isWindowOpen">
+        <Modal v-model="appStore().isWindowOpen" v-if="modalType === 'confirmation'">
             <div class="confirm-layout">
                 <p class="confirm-text">Are you sure you want to disconnect from your wallet?</p>
                 <div class="buttons-layout">
@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 
 import Button from '../shared/Button.vue';
 import LogoIcon from './Icons/LogoIcon.vue';
@@ -53,13 +53,16 @@ import Modal from '../shared/Modal.vue';
 
 const router = useRouter();
 
+const modalType = ref<'transaction' | 'confirmation' | ''>('');
+
 const copyToast = reactive({
     visible: false,
-    timer: 0 as unknown as number
+    timer: null as NodeJS.Timeout | null
 });
 
 const openConfirmModal = () => {
     appStore().isWindowOpen = true;
+    modalType.value = 'confirmation';
 };
 
 const confirmDisconnect = async () => {
@@ -81,7 +84,10 @@ const copyText = async () => {
         await navigator.clipboard.writeText(appStore().userAddress);
 
         copyToast.visible = true;
-        clearTimeout(copyToast.timer);
+
+        if (copyToast.timer) {
+            clearTimeout(copyToast.timer);
+        }
 
         copyToast.timer = setTimeout(() => (copyToast.visible = false), 1200);
     } catch (err) {

@@ -34,16 +34,22 @@ import WalletIcon from '../components/Icons/WalletIcon.vue';
 import Button from '../shared/Button.vue';
 import Modal from '../shared/Modal.vue';
 import Loader from '../shared/Loader.vue';
-import { connectWalletService } from '../services/useWallet';
+import { connectWalletService, getAllTransactionsService } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const connectWallet = async () => {
-    await connectWalletService();
+    const res = await connectWalletService();
 
-    router.push('/dashboard');
+    // const trans = await getAllTransactionsService();
+
+    // console.log(trans);
+
+    if (res) {
+        router.push('/dashboard');
+    }
 };
 </script>
 

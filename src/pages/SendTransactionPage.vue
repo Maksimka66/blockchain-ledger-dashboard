@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { getBalanceService, getGasPriceService } from '../services/useWallet';
+import { getGasPriceService } from '../services/useWallet';
 import Header from '../components/Header.vue';
 import NavBar from '../components/NavBar.vue';
 import { sendTransactionService } from '../services/useWallet';
@@ -69,7 +69,7 @@ const localToast = reactive({
     visible: false,
     message: '',
     type: 'info' as 'success' | 'error' | 'warning' | 'info',
-    timer: 0 as unknown as number
+    timer: null as NodeJS.Timeout | null
 });
 
 const showLocalToast = (
@@ -80,7 +80,10 @@ const showLocalToast = (
     localToast.message = message;
     localToast.type = type;
     localToast.visible = true;
-    clearTimeout(localToast.timer);
+
+    if (localToast.timer) {
+        clearTimeout(localToast.timer);
+    }
 
     localToast.timer = setTimeout(() => {
         localToast.visible = false;
@@ -108,53 +111,66 @@ const handleSendTransaction = async () => {
         return;
     }
 
-    const balanceEthStr = await getBalanceService();
-    console.log(balanceEthStr);
-
-    const balanceEth = parseFloat(balanceEthStr);
-
     const gasPriceHex = await getGasPriceService();
     const gasPriceWei = parseInt(gasPriceHex, 16);
     const gasLimit = 21000;
     const feeEth = (gasPriceWei * gasLimit) / 1e18;
 
-    console.log(feeEth);
+    console.log('Estimated fee:', feeEth);
 
-    const totalEthNeeded = parsedAmount + feeEth;
-
-    if (balanceEth < totalEthNeeded) {
-        showLocalToast(
-            `Insufficient funds. Needed ≈ ${totalEthNeeded.toFixed(6)} ETH (incl. fee ~${feeEth.toFixed(6)} ETH).`,
-            'error'
-        );
-        return;
-    }
+    let tx: any = null;
 
     try {
-        const txHash = await sendTransactionService({
+        tx = await sendTransactionService({
             toAddress: formData.toAddress,
             amount: parsedAmount
         });
 
         appStore().addResentTransaction({
-            id: txHash,
+            id: tx.hash,
             type: 'Transfer',
             timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
             status: 'Pending',
-            block: 0
+            block: 0,
+            amount: parsedAmount
         });
+
+        const receipt = await tx.wait();
+
+        if (receipt.status === 1) {
+            appStore().updateResentTransaction(tx.hash, {
+                status: 'Validated',
+                block: receipt.blockNumber
+            });
+        } else {
+            appStore().updateResentTransaction(tx.hash, {
+                status: 'Invalid',
+                block: receipt.blockNumber
+            });
+        }
 
         showLocalToast('Transaction sent', 'success');
 
         formData.toAddress = '';
         formData.amount = '';
     } catch (err: any) {
-        if (err?.code === 4001) {
-            showLocalToast('Transaction was rejected', 'warning');
-        } else {
-            showLocalToast('Transaction failed. Please try again.', 'error');
-        }
-        console.error(err);
+        console.error('Transaction error:', err);
+
+        appStore().addResentTransaction({
+            id: `failed-${Date.now()}`,
+            type: 'Transfer',
+            timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+            status: 'Invalid',
+            block: 0,
+            amount: parsedAmount
+        });
+
+        showLocalToast(
+            err?.code === 4001
+                ? 'Transaction was rejected'
+                : 'Transaction failed. Please try again.',
+            'error'
+        );
     }
 };
 </script>

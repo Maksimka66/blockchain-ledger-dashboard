@@ -30,6 +30,7 @@ const hideWindow = () => {
     background-color: #00000080;
     position: fixed;
     display: flex;
+    z-index: 999;
 }
 
 .modal-content {

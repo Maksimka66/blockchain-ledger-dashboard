@@ -58,11 +58,20 @@ const props = defineProps({
     padding: 4px 16px;
 }
 
-.pagination-button {
+.resent-transactions-button {
     padding: 4px 8px;
     border-radius: 8px;
     border: 1px solid #0f0f0f;
     color: gray;
+}
+
+.current-transaction {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    padding: 4px 12px;
 }
 
 .confirm {

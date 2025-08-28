@@ -8,44 +8,126 @@
             <p class="transactions-cell">Block</p>
         </li>
 
-        <li class="transactions-row" v-for="value in paged" :key="value.id">
-            <p class="transactions-cell transaction-id">{{ value.id }}</p>
+        <li class="transactions-row" v-for="value in res" :key="value.hash">
+            <Button
+                @click="getTransactionInfo(value.hash)"
+                class="transactions-cell transaction-id current-transaction"
+            >
+                {{ value.hash }}
+            </Button>
             <p class="transactions-cell">
                 <span class="type-badge">{{ value.type }}</span>
             </p>
-            <p class="transactions-cell">{{ value.timestamp }}</p>
+            <p class="transactions-cell">{{ value.timeStamp }}</p>
             <p class="transactions-cell">
-                <span :class="getStatusClass(value.status)">{{ value.status }}</span>
+                <!-- <span :class="getStatusClass(value.status)">{{ value.status }}</span> -->
             </p>
-            <p class="transactions-cell">{{ value.block }}</p>
+            <p class="transactions-cell">{{ value.blockNumber }}</p>
+            <div class="transactions-actions" v-if="value.status === 'Invalid'">
+                <Button class="resent-transactions-button"> Retry </Button>
+            </div>
         </li>
     </ul>
+
+    <!-- Pagination -->
+    <Pagination
+        :total-items="allTransactions.length"
+        :page-size="pageSize"
+        @page-change="handlePageChange"
+    />
+
+    <Modal v-model="appStore().isWindowOpen" v-if="modalType === 'transaction'">
+        <div class="transaction-details">
+            <h3 class="transaction-details-title">Transaction Details</h3>
+            <div class="transaction-details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Transaction ID</span>
+                    <span class="detail-value">{{ selectedTx.hash }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Creator</span>
+                    <span class="detail-value">{{ selectedTx.from }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Endorsements</span>
+                    <span class="detail-value">{{ selectedTx.endorsements }}</span>
+                </div>
+            </div>
+        </div>
+    </Modal>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
+import Button from '../shared/Button.vue';
+import Modal from '../shared/Modal.vue';
+import Pagination from '../shared/Pagination.vue';
+import { getAllTransactionsService, getCurrentTransaction } from '../services/useWallet';
 import { appStore } from '../stores/appStore';
 
-const store = appStore();
-const paged = computed(() => store.pagedResentTransactions);
+import type { Transaction, TransactionDetails } from '../types';
 
-const getStatusClass = (status: string) => {
-    switch (status.toLowerCase()) {
-        case 'validated':
-        case 'valid':
-            return 'status-badge status-valid';
-        case 'success':
-            return 'status-badge status-success';
-        case 'pending':
-        case 'in progress':
-            return 'status-badge status-pending';
-        case 'invalid':
-        case 'failed':
-            return 'status-badge status-invalid';
-        default:
-            return 'status-badge status-default';
-    }
+const res = ref<Transaction[]>([]);
+const allTransactions = ref<Transaction[]>([]);
+
+const currentPage = ref(1);
+const pageSize = 5;
+
+const selectedTx = ref<TransactionDetails>({
+    hash: '',
+    from: '',
+    endorsements: []
+});
+
+const modalType = ref<'transaction' | 'confirmation' | ''>('');
+
+const getTransactionInfo = async (txHash: string) => {
+    appStore().isWindowOpen = true;
+    modalType.value = 'transaction';
+    const txData = await getCurrentTransaction(txHash);
+    console.log(txData);
+
+    selectedTx.value = txData;
+    console.log(selectedTx);
 };
+
+const handlePageChange = (page: number) => {
+    currentPage.value = page;
+    updateDisplayedTransactions();
+};
+
+const updateDisplayedTransactions = () => {
+    const start = (currentPage.value - 1) * pageSize;
+    const end = start + pageSize;
+    res.value = allTransactions.value.slice(start, end);
+};
+// const getStatusClass = (status: string) => {
+//     switch (status.toLowerCase()) {
+//         case 'validated':
+//         case 'valid':
+//             return 'status-badge status-valid';
+//         case 'success':
+//             return 'status-badge status-success';
+//         case 'pending':
+//         case 'in progress':
+//             return 'status-badge status-pending';
+//         case 'invalid':
+//         case 'failed':
+//             return 'status-badge status-invalid';
+//         default:
+//             return 'status-badge status-default';
+//     }
+// };
+
+onMounted(async () => {
+    try {
+        const response = await getAllTransactionsService();
+        allTransactions.value = response;
+        updateDisplayedTransactions();
+    } catch (error) {
+        console.log(error);
+    }
+});
 </script>
 
 <style scoped>
@@ -147,5 +229,65 @@ const getStatusClass = (status: string) => {
     border: 1px solid #d1d5db;
     background-color: #f3f4f6;
     color: #4b5563;
+}
+
+/* Transaction Details Modal */
+.transaction-details {
+    padding: 24px;
+    max-width: 500px;
+}
+
+.transaction-details-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 24px 0;
+    text-align: center;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 12px;
+}
+
+.transaction-details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    word-break: break-all;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    background: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
 }
 </style>

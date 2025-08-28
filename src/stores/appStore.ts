@@ -1,12 +1,5 @@
 import { defineStore } from 'pinia';
-
-export interface ITransactionData {
-    id: string;
-    type: string;
-    timestamp: string;
-    status: 'Validated' | 'Pending' | 'Invalid' | 'Success';
-    block: number;
-}
+import type { ITransactionData } from '../types';
 
 interface IAppState {
     userAddress: string;
@@ -14,7 +7,7 @@ interface IAppState {
     resentTransactions: ITransactionData[];
     isWindowOpen: boolean;
     isLoading: boolean;
-    txStatusFilter: 'All' | 'Pending' | 'Success' | 'Validated' | 'Invalid';
+    txStatusFilter: 'All' | 'Pending' | 'Validated' | 'Invalid';
     txIdQuery: string;
     txPage: number;
     txPageSize: number;
@@ -24,134 +17,7 @@ export const appStore = defineStore('appStore', {
     state: (): IAppState => ({
         userAddress: '',
         totalValue: 0,
-        resentTransactions: [
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            },
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            },
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            },
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            },
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            },
-            {
-                id: '0xa1b2c3d4e5f6789',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:30:15',
-                status: 'Invalid',
-                block: 3457821
-            },
-            {
-                id: '0xf6e5d4c3b2a1098',
-                type: 'Mint',
-                timestamp: '2024-08-19 10:25:42',
-                status: 'Validated',
-                block: 3457820
-            },
-            {
-                id: '0x9876543210abcdef',
-                type: 'Transfer',
-                timestamp: '2024-08-19 10:20:08',
-                status: 'Pending',
-                block: 3457819
-            }
-        ],
+        resentTransactions: [],
         isWindowOpen: true,
         isLoading: false,
         txStatusFilter: 'All',
@@ -184,6 +50,9 @@ export const appStore = defineStore('appStore', {
         setUserAddress(address: string) {
             this.userAddress = address;
         },
+        setTotalValue(value: number) {
+            this.totalValue = value;
+        },
         setIsWindowOpen(open: boolean) {
             this.isWindowOpen = open;
         },
@@ -191,9 +60,13 @@ export const appStore = defineStore('appStore', {
             this.isLoading = toggle;
         },
         addResentTransaction(tx: ITransactionData) {
+            console.log(tx);
+
             this.resentTransactions.unshift(tx);
         },
         updateResentTransaction(id: string, partial: Partial<ITransactionData>) {
+            console.log(partial);
+
             const index = this.resentTransactions.findIndex((t) => t.id === id);
             if (index !== -1) {
                 this.resentTransactions[index] = {
@@ -202,7 +75,7 @@ export const appStore = defineStore('appStore', {
                 };
             }
         },
-        setTxStatusFilter(value: 'All' | 'Pending' | 'Success' | 'Validated' | 'Invalid') {
+        setTxStatusFilter(value: 'All' | 'Pending' | 'Validated' | 'Invalid') {
             this.txStatusFilter = value;
             this.txPage = 1;
         },

@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import { appStore } from '../stores/appStore';
 
 interface ITransactionParameters {
@@ -14,7 +15,7 @@ interface ISendTransactionParams {
     gasPrice?: string;
 }
 
-export const connectWalletService = async () => {
+export async function connectWalletService() {
     try {
         appStore().setIsLoading(true);
 
@@ -23,26 +24,77 @@ export const connectWalletService = async () => {
             return;
         }
 
-        const accounts = (await window.ethereum.request({
+        const accounts = await window.ethereum.request({
             method: 'eth_requestAccounts'
-        })) as string[];
+        });
+
+        const balance = await getBalanceService(accounts[0]);
+
+        console.log(balance);
 
         if (accounts.length > 0) {
-            console.log('Your wallet is connected:', accounts[0]);
-
             appStore().setUserAddress(accounts[0]);
-            appStore().setIsWindowOpen(false);
-
             localStorage.setItem('userAddress', accounts[0]);
+            return {
+                address: accounts[0],
+                balance
+            };
+        } else {
         }
     } catch (error) {
         console.error('Error:', error);
     } finally {
         appStore().setIsLoading(false);
     }
-};
+}
 
-export const disconnectWalletService = async () => {
+export async function getBalanceService(address: string): Promise<number> {
+    try {
+        if (!window.ethereum) return 0;
+
+        const balanceHex = await window.ethereum.request({
+            method: 'eth_getBalance',
+            params: [address, 'latest']
+        });
+
+        const balanceWei = BigInt(balanceHex);
+        const balanceEth = parseFloat(ethers.formatEther(balanceWei));
+
+        const ethToUsdRate = 4502.83;
+        return balanceEth * ethToUsdRate;
+    } catch (error) {
+        console.error('Error!', error);
+        return 0;
+    }
+}
+
+export async function getAllTransactionsService() {
+    try {
+        const address = '0x0970ce7c99c95db8cc08710b6a44e299a4ae727e';
+        const apiKey = 'YXD5ZJ4XVJ3MAJDVEJ6ASIX5Z55WKTUDGX';
+
+        const url = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${apiKey}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+        const transactions = data.result;
+
+        return transactions;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getCurrentTransaction(hash: string) {
+    const res = await window.ethereum?.request({
+        method: 'eth_getTransactionByHash',
+        params: [hash]
+    });
+
+    return res;
+}
+
+export async function disconnectWalletService() {
     try {
         appStore().setIsLoading(true);
 
@@ -60,13 +112,13 @@ export const disconnectWalletService = async () => {
     } finally {
         appStore().setIsLoading(false);
     }
-};
+}
 
-export const sendTransactionService = async ({
+export async function sendTransactionService({
     toAddress,
     amount,
     gasPrice
-}: ISendTransactionParams) => {
+}: ISendTransactionParams) {
     try {
         appStore().setIsLoading(true);
 
@@ -89,12 +141,12 @@ export const sendTransactionService = async ({
             transactionParameters.gasPrice = gasPrice;
         }
 
-        const txHash = (await window.ethereum.request({
+        const txHash = await window.ethereum.request({
             method: 'eth_sendTransaction',
             params: [transactionParameters]
-        })) as string;
+        });
 
-        console.log('Your transaction has been sent!', txHash);
+        console.log(txHash);
 
         trackTransactionStatus(txHash).catch((e) => console.error('Track status error', e));
 
@@ -105,31 +157,9 @@ export const sendTransactionService = async ({
     } finally {
         appStore().setIsLoading(false);
     }
-};
+}
 
-export const getBalanceService = async () => {
-    try {
-        if (!window.ethereum || !appStore().userAddress) {
-            return '0';
-        }
-
-        const balanceHex = await window.ethereum.request({
-            method: 'eth_getBalance',
-            params: [appStore().userAddress, 'latest']
-        });
-
-        const balanceWei = BigInt(balanceHex);
-
-        const balanceEth = Number(balanceWei) / 1e18;
-
-        return balanceEth.toString();
-    } catch (error) {
-        console.error('Ошибка получения баланса:', error);
-        return '0';
-    }
-};
-
-export const restoreWalletState = () => {
+export async function restoreWalletState() {
     try {
         if (typeof window !== 'undefined') {
             const savedAddress = localStorage.getItem('userAddress');
@@ -145,11 +175,11 @@ export const restoreWalletState = () => {
         console.error('Error restoring wallet state:', error);
         return false;
     }
-};
+}
 
-export const isWalletConnected = (): boolean => {
+export async function isWalletConnected(): Promise<boolean> {
     return !!appStore().userAddress;
-};
+}
 
 export const getGasPriceService = async () => {
     try {
@@ -170,7 +200,7 @@ export const getGasPriceService = async () => {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const trackTransactionStatus = async (txHash: string) => {
+async function trackTransactionStatus(txHash: string) {
     const provider = window.ethereum;
     if (!provider) return;
 
@@ -188,7 +218,7 @@ const trackTransactionStatus = async (txHash: string) => {
 
                 if (statusHex === '0x1') {
                     appStore().updateResentTransaction(txHash, {
-                        status: 'Success',
+                        status: 'Validated',
                         block: blockNumber
                     });
                 } else if (statusHex === '0x0') {
@@ -209,4 +239,4 @@ const trackTransactionStatus = async (txHash: string) => {
         }
         await delay(5000);
     }
-};
+}

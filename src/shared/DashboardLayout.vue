@@ -22,6 +22,7 @@ const props = defineProps({
     display: flex;
     flex-direction: column;
     row-gap: 20px;
+    justify-content: center;
 }
 
 .resent-transactions-layout {
